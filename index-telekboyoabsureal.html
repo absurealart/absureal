@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TELEKBOYO - AI Image Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="./css/main.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#818cf8',
+                            DEFAULT: '#6366f1',
+                            dark: '#4f46e5'
+                        },
+                        secondary: '#a855f7',
+                        darkbg: '#1E293B',
+                        lightbg: '#F1F5F9',
+                        darktext: '#E5E7EB',
+                    },
+                    fontFamily: {
+                        'dancing': ['Dancing Script', 'cursive'],
+                        'inter': ['Inter', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'neu-light': '8px 8px 16px rgba(163,177,198,0.6), -8px -8px 16px rgba(255,255,255,0.5)',
+                        'neu-dark': '8px 8px 16px rgba(0,0,0,0.5), -8px -8px 16px rgba(74,85,104,0.5)',
+                        'neu-btn': '5px 5px 10px rgba(163,177,198,0.6), -5px -5px 10px rgba(255,255,255,0.5)',
+                        'neu-btn-dark': '5px 5px 10px rgba(0,0,0,0.5), -5px -5px 10px rgba(74,85,104,0.5)',
+                        'neu-inset': 'inset 5px 5px 10px rgba(163,177,198,0.6), inset -5px -5px 10px rgba(255,255,255,0.5)',
+                        'neu-inset-dark': 'inset 5px 5px 10px rgba(0,0,0,0.5), inset -5px -5px 10px rgba(74,85,104,0.5)'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Firebase scripts  -->
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyCoiUYFYXID-gKiR6mlg3p-OS2NuDJrXrE",
+      authDomain: "telekboyo-236a9.firebaseapp.com",
+      projectId: "telekboyo-236a9",
+      storageBucket: "telekboyo-236a9.appspot.com",
+      messagingSenderId: "384383972195",
+      appId: "1:384383972195:web:41c98f7f74047513e19956",
+      measurementId: "G-3F2JCD5VJ4"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7847363779948530"
+     crossorigin="anonymous"></script>
+    <style>
+        /* Tab Navigation Styles */
+.tab-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-nav {
+    display: flex;
+    flex-wrap: nowrap;
+    min-width: fit-content;
+}
+
+.tab-btn {
+    white-space: nowrap;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    border-bottom-width: 2px;
+    border-color: transparent;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    color: #6366f1;
+    border-color: #6366f1;
+}
+
+.tab-btn i {
+    margin-right: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .tab-btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+        /* Prompt Enhancement Styles */
+        .prompt-suggestion-title {
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+            color: #6366f1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .prompt-suggestion-title::after {
+            content: "Click to use";
+            font-size: 0.7rem;
+            color: #6b7280;
+            font-weight: normal;
+        }
+
+        .dark .prompt-suggestion-title::after {
+            color: #9ca3af;
+        }
+
+        .prompt-suggestion-text {
+            font-size: 0.9rem;
+            color: #4b5563;
+            line-height: 1.4;
+        }
+
+        .dark .prompt-suggestion-text {
+            color: #d1d5db;
+        }
+
+        .prompt-generator-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .dark .prompt-generator-container {
+            background: #2d3748;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .prompt-generator-loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #6366f1;
+            font-size: 0.9rem;
+        }
+
+        .dark .prompt-generator-loading {
+            color: #818cf8;
+        }
+
+        .prompt-suggestions {
+            margin-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .dark .prompt-suggestions {
+            border-top-color: #4b5563;
+        }
+
+        .prompt-suggestion {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dark .prompt-suggestion {
+            background: #374151;
+        }
+
+        .prompt-suggestion:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .prompt-suggestion:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ef4444;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+        
+        /* Image Analysis specific styles */
+        #analysisContent .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        #uploadArea {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        #uploadArea:hover {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        
+        #imagePreview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 1rem;
+            display: none;
+        }
+        
+        #loadingIndicator {
+            text-align: center;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        #result {
+            min-height: 100px;
+            position: relative;
+        }
+        
+        #copyBtn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="h-full bg-lightbg dark:bg-darkbg transition-colors duration-300 font-inter">
+    <!-- Image Zoom Modal -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="zoomedImage">
+    </div>
+
+    <div class="min-h-full flex flex-col">
+        <!-- Header -->
+        <header class="neuromorphic sticky top-0 z-10 mx-4 mt-4">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <img src="./icon.png" alt="TELEKBOYO Logo" class="h-10 mr-3">
+                    <div>
+                        <h1 class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font">TELEKBOYO</h1>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">AI Image Generator</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="neuromorphic-btn p-3 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path id="themeIcon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+       <!-- Tab Navigation -->
+        <div class="neuromorphic mx-4 mt-2">
+    <div class="container mx-auto px-0">
+        <div class="flex justify-between border-b border-gray-200 dark:border-gray-700">
+            <button id="imageTab" class="tab-btn active flex-1 text-center py-3 px-2 font-medium text-primary border-b-2 border-primary">
+                <i class="fas fa-image mr-1"></i>Image
+            </button>
+            <button id="chatTab" class="tab-btn flex-1 text-center py-3 px-2 font-medium text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                <i class="fas fa-comments mr-1"></i>Chat
+            </button>
+            <button id="analysisTab" class="tab-btn flex-1 text-center py-3 px-2 font-medium text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                <i class="fas fa-search mr-1"></i>Analyze
+            </button>
+            <button id="videoTab" class="tab-btn flex-1 text-center py-3 px-2 font-medium text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary">
+                <i class="fas fa-video mr-1"></i>Video
+            </button>
+        </div>
+    </div>
+        </div>
+        <!-- Main Content - Image Generator (Default) -->
+        <main id="imageGeneratorContent" class="flex-grow flex container mx-auto px-4 py-6 gap-6">
+            <!-- Left Sidebar - Controls -->
+            <div class="w-80 flex-shrink-0">
+                <div class="neuromorphic p-6 h-full">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-darktext flex items-center">
+                        <i class="fas fa-sliders-h mr-2 text-primary"></i>Controls
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Prompt Input -->
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2 flex items-center">
+                                <i class="fas fa-keyboard mr-2 text-primary-light"></i>Prompt
+                            </label>
+                            <textarea id="prompt" rows="3" class="neuromorphic-input w-full px-4 py-3 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Describe your image..."></textarea>
+                            <span id="clearPrompt" class="clear-prompt" style="display: none;">
+                                <i class="fas fa-times"></i>
+                            </span>
+                        </div>
+                        
+                        <!-- Prompt Enhancement Section -->
+                        <div class="prompt-generator-container">
+                            <div class="model-selector neuromorphic p-3 rounded-lg mb-4">
+                                <select id="promptModelSelect" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext">
+                                    <option value="openai-large">GPT-4.1 Standard (Most capable)</option>
+                                    <option value="openai">GPT-4.1 Mini (Balanced)</option>
+                                    <option value="mirexa">Mirexa AI (Creative tasks)</option>
+                                    <option value="openai-fast">GPT-4.1 Nano (Fastest)</option>
+                                </select>
+                                <p id="modelDescription" class="text-xs text-gray-500 dark:text-gray-400 mt-1">GPT-4.1 Standard - Most capable version with full features</p>
+                            </div>
+                            
+                            <button id="generatePromptBtn" class="neuromorphic-btn w-full py-3 px-4 text-gray-700 dark:text-darktext font-medium rounded-lg flex items-center justify-center hover:bg-primary-light hover:text-white transition-all">
+                                <i class="fas fa-magic mr-2"></i>Generate 3 Enhanced Prompts
+                            </button>
+                            
+                            <div id="promptGeneratorLoading" class="prompt-generator-loading">
+                                <i class="fas fa-spinner fa-spin mr-2"></i>Generating with GPT-4.1...
+                            </div>
+                            
+                            <div id="promptSuggestions" class="prompt-suggestions">
+                                <p class="text-center text-gray-500 dark:text-gray-400 py-4">Your enhanced prompts will appear here...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Style & Technique Selection -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2 flex items-center">
+                                    <i class="fas fa-palette mr-2 text-primary-light"></i>option 1
+                                </label>
+                                <select id="styleSelect" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="">-- Select --</option>
+                                    <!-- Options populated by JavaScript -->
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2 flex items-center">
+                                    <i class="fas fa-brush mr-2 text-primary-light"></i>option 2
+                                </label>
+                                <select id="techniqueSelect" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option value="">-- Select --</option>
+                                    <!-- Options populated by JavaScript -->
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Settings Toggle -->
+                        <div>
+                            <button id="settingsToggle" class="neuromorphic-btn w-full py-3 px-4 text-gray-700 dark:text-darktext font-medium rounded-lg flex items-center justify-between hover:bg-primary-light hover:text-white transition-all">
+                                <span class="flex items-center">
+                                    <i class="fas fa-cog mr-2"></i>Advanced Settings
+                                </span>
+                                <svg id="settingsIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                            
+                            <!-- Settings Panel -->
+                            <div id="settingsPanel" class="settings-panel mt-2 space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                        <i class="fas fa-ban mr-2 text-primary-light"></i>Negative Prompt
+                                    </label>
+                                    <textarea id="negativePrompt" rows="2" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary" placeholder="What to exclude from the image..."></textarea>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                            <i class="fas fa-arrows-alt-h mr-2 text-primary-light"></i>Width
+                                        </label>
+                                        <select id="width" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                            <option value="512">512</option>
+                                            <option value="768">768</option>
+                                            <option value="1024">1024</option>
+                                            <option value="1536">1536</option>
+                                            <option value="2048">2048</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                            <i class="fas fa-arrows-alt-v mr-2 text-primary-light"></i>Height
+                                        </label>
+                                        <select id="height" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                            <option value="512">512</option>
+                                            <option value="768">768</option>
+                                            <option value="1024">1024</option>
+                                            <option value="1536">1536</option>
+                                            <option value="2048">2048</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                            <i class="fas fa-shoe-prints mr-2 text-primary-light"></i>Steps
+                                        </label>
+                                        <input id="steps" type="number" min="10" max="150" value="50" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                            <i class="fas fa-seedling mr-2 text-primary-light"></i>Seed
+                                        </label>
+                                        <input id="seed" type="number" min="0" max="1000000" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Random">
+                                    </div>
+                                </div>
+                               
+                                <!-- Model Selection -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                        <i class="fas fa-brain mr-2 text-primary-light"></i>Model
+                                    </label>
+                                    <select id="model" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="flux">Default</option>
+                                        <option value="turbo">Turbo</option>
+                                    </select>
+                                </div>
+
+                                <!-- Watermark Toggle -->
+                                <div class="flex items-center justify-between">
+                                    <label class="text-sm font-medium text-gray-700 dark:text-darktext flex items-center">
+                                        <i class="fas fa-water mr-2 text-primary-light"></i>Watermark
+                                    </label>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input id="watermarkToggle" type="checkbox" checked class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+
+                                <!-- CFG Scale -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                        <i class="fas fa-sliders-h mr-2 text-primary-light"></i>CFG Scale (7-12)
+                                    </label>
+                                    <input id="cfgScale" type="range" min="7" max="12" value="7" step="0.5" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+                                    <span id="cfgScaleValue" class="text-xs text-gray-500 dark:text-gray-400">7</span>
+                                </div>
+
+                                <!-- Sampler -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                        <i class="fas fa-filter mr-2 text-primary-light"></i>Sampler
+                                    </label>
+                                    <select id="sampler" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="euler_a">Euler a</option>
+                                        <option value="euler">Euler</option>
+                                        <option value="lms">LMS</option>
+                                        <option value="dpm2">DPM2</option>
+                                        <option value="dpm2_a">DPM2 a</option>
+                                    </select>
+                                </div>
+
+                                <!-- Image Format -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                        <i class="fas fa-file-image mr-2 text-primary-light"></i>Image Format
+                                    </label>
+                                    <select id="format" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="png">PNG</option>
+                                        <option value="jpg">JPG</option>
+                                        <option value="webp">WebP</option>
+                                    </select>
+                                </div>
+
+                                <!-- Enhancer Options -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1 flex items-center">
+                                        <i class="fas fa-magic mr-2 text-primary-light"></i>Quality Enhancer
+                                    </label>
+                                    <select id="enhancer" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                        <option value="none">None</option>
+                                        <option value="upscale">Upscale 2x</option>
+                                        <option value="hq">High Quality</option>
+                                        <option value="ultra">Ultra Details</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Generate Buttons -->
+                        <div class="grid grid-cols-2 gap-4 pt-2">
+                            <button id="generateBtn" class="neuromorphic-btn w-full py-3 px-6 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-lg hover:opacity-90 transition flex items-center justify-center">
+                                <i class="fas fa-bolt mr-2"></i>Generate
+                            </button>
+                            <button id="variationBtn" class="neuromorphic-btn w-full py-3 px-6 bg-gradient-to-r from-secondary to-primary text-white font-bold rounded-lg hover:opacity-90 transition flex items-center justify-center">
+                                <i class="fas fa-random mr-2"></i>Variation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="flex-grow">
+                <div class="neuromorphic p-6 h-full">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-darktext flex items-center">
+                            <i class="fas fa-image mr-2 text-primary"></i>Result
+                        </h2>
+                        <div class="flex space-x-2">
+                            <button id="saveBtn" class="neuromorphic-btn p-3 rounded-full hover:bg-primary-light hover:text-white transition" title="Save Image">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button id="resetBtn" class="neuromorphic-btn p-3 rounded-full hover:bg-primary-light hover:text-white transition" title="Reset">
+                                <i class="fas fa-undo"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Image Display -->
+                    <div id="imageContainer" class="relative min-h-[500px] bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                        <div class="text-center p-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p class="text-sm text-gray-400 dark:text-gray-300">Image will appear here</p>
+                        </div>
+                    </div>
+                    
+<!-- Image Filters Section -->
+<div class="mt-6 neuromorphic p-4 rounded-lg">
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-darktext mb-4 flex items-center">
+        <i class="fas fa-sliders-h mr-2 text-primary"></i>Image Filters
+    </h3>
+    
+    <div class="space-y-4">
+        <!-- Brightness Control -->
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <label class="text-sm font-medium text-gray-700 dark:text-darktext flex items-center">
+                    <i class="fas fa-sun mr-2 text-primary-light"></i>Brightness
+                </label>
+                <span id="brightnessValue" class="text-xs bg-primary/10 text-primary dark:text-primary-light px-2 py-1 rounded">0</span>
+            </div>
+            <input id="brightnessSlider" type="range" min="-100" max="100" value="0" step="1" 
+                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+        </div>
+        
+        <!-- Contrast/Sharpness Control -->
+        <div>
+            <div class="flex justify-between items-center mb-1">
+                <label class="text-sm font-medium text-gray-700 dark:text-darktext flex items-center">
+                    <i class="fas fa-adjust mr-2 text-primary-light"></i>Contrast/Sharpness
+                </label>
+                <span id="contrastValue" class="text-xs bg-primary/10 text-primary dark:text-primary-light px-2 py-1 rounded">100</span>
+            </div>
+            <input id="contrastSlider" type="range" min="0" max="200" value="100" step="1" 
+                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-2 pt-2">
+            <button id="applyFiltersBtn" class="neuromorphic-btn py-2 px-4 bg-primary/10 text-primary dark:text-primary-light font-medium rounded-lg hover:bg-primary/20 transition flex items-center justify-center">
+                <i class="fas fa-check-circle mr-2"></i>Apply
+            </button>
+            <button id="resetFiltersBtn" class="neuromorphic-btn py-2 px-4 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition flex items-center justify-center">
+                <i class="fas fa-undo mr-2"></i>Reset
+            </button>
+        </div>
+    </div>
+</div>
+
+                    <!-- History Section -->
+                    <div class="mt-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-darktext flex items-center">
+                                <i class="fas fa-history mr-2 text-primary"></i>Generation History
+                            </h3>
+                            <button id="clearHistoryBtn" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center">
+                                <i class="fas fa-trash-alt mr-1"></i>Clear All
+                            </button>
+                        </div>
+                        <div id="historyContainer" class="space-y-3 max-h-64 overflow-y-auto">
+                            <!-- History items will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Main Content - AI Chat (Hidden by default) -->
+        <main id="chatContent" class="hidden flex-grow container mx-auto px-4 py-6">
+            <div class="neuromorphic p-6 h-full flex flex-col">
+                <div class="flex-grow">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-darktext flex items-center">
+                            <i class="fas fa-comments mr-2 text-primary"></i>AI Chat Assistant
+                        </h2>
+                        <button id="new-chat" class="neuromorphic-btn px-4 py-2 text-sm flex items-center">
+                            <i class="fas fa-plus mr-2"></i>New Chat
+                        </button>
+                    </div>
+                    
+                    <div class="model-selector neuromorphic p-3 rounded-lg mb-4">
+                        <select id="model-select" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext">
+                            <option value="openai">OpenAI GPT-4.1-mini</option>
+                            <option value="openai-fast">OpenAI GPT-4.1-nano (Fast)</option>
+                            <option value="mistral">Mistral Small 3.1 24B</option>
+                            <option value="llama">Llama 3.3 70B</option>
+                            <option value="deepseek-reasoning">DeepSeek R1 (Reasoning)</option>
+                            <option value="qwen-coder">Qwen 2.5 Coder 32B</option>
+                            <option value="unity">Unity Unrestricted Agent <span class="warning-badge">UNCENSORED</span></option>
+                            <option value="evil">Evil AI <span class="warning-badge">UNCENSORED</span></option>
+                        </select>
+                    </div>
+
+                    <div class="chat-messages neuromorphic p-4 rounded-lg flex-grow" id="chat-messages" style="height: calc(100% - 180px);">
+                        <div class="bot-message message">
+                            Halo!saya boyo, apa yang bisa saya bantu?. (tekan bubble chat untuk menampilkan fitur copy,hapus, dan suara)
+                            <div class="message-actions">
+                                <span class="message-action copy-btn">Copy</span>
+                                <span class="message-action delete-btn">Delete</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input mt-4">
+                    <div class="flex gap-2">
+                        <input type="text" id="user-input" class="neuromorphic-input flex-grow px-4 py-3" placeholder="Type your message here..." autocomplete="off">
+                        <button id="send-button" class="neuromorphic-btn px-6 bg-gradient-to-r from-primary to-secondary text-white">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="conversation-history mt-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-darktext flex items-center">
+                            <i class="fas fa-history mr-2 text-primary"></i>Conversation History
+                        </h3>
+                    </div>
+                    <div id="history-list" class="space-y-2 max-h-40 overflow-y-auto">
+                        <!-- History items will be added here -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Main Content - Image Analysis (Hidden by default) -->
+        <main id="analysisContent" class="hidden flex-grow container mx-auto px-4 py-6">
+            <div class="neuromorphic p-6 h-full">
+                <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-darktext">GPT-4.1 Image Analysis</h1>
+                
+                <div class="container">
+                    <div class="upload-area" id="uploadArea">
+                        <p>📁 Drag & drop an image here or click to browse</p>
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        <img id="imagePreview" alt="Preview">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="modelSelect" class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1">GPT-4.1 Version:</label>
+                            <select id="modelSelect" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option value="openai">GPT-4.1-mini (Faster)</option>
+                                <option value="openai-large">GPT-4.1 (More Powerful)</option>
+                            </select>
+                            <p class="model-info text-xs text-gray-500 dark:text-gray-400 mb-2">Supports: Text and Image input</p>
+                        </div>
+                        
+                        <div>
+                            <label for="questionInput" class="block text-sm font-medium text-gray-700 dark:text-darktext mb-1">Question:</label>
+                            <textarea id="questionInput" rows="3" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Ask about the image (e.g., 'What's in this image?', 'Describe this picture in detail')">What's in this image?</textarea>
+                        </div>
+                    </div>
+                    
+                    <button id="analyzeBtn" class="neuromorphic-btn w-full py-3 px-6 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-lg hover:opacity-90 transition flex items-center justify-center mt-4" disabled>
+                        <i class="fas fa-search mr-2"></i>Analyze Image
+                    </button>
+                    
+                    <div class="loading" id="loadingIndicator" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>Analyzing image...</p>
+                    </div>
+                    
+                    <div id="result" class="neuromorphic-input mt-4 p-4">
+                        <button class="copy-btn" id="copyBtn">Copy</button>
+                        <div id="resultText"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+<!-- Add this as a new main content section (before the footer) -->
+<main id="videoContent" class="hidden flex-grow container mx-auto px-4 py-6">
+    <div class="neuromorphic p-6 h-full">
+        <h1 class="text-2xl font-bold mb-6 text-gray-800 dark:text-darktext">Video Prompt Generator</h1>
+        
+        <div class="video-prompt-generator">
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Model AI:</label>
+                <select id="videoModelSelect" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext">
+                    <option value="openai-large">GPT-4.1 Video Pro</option>
+                    <option value="openai" selected>GPT-4.1 Standard</option>
+                    <option value="mirexa">Mirexa Video AI</option>
+                    <option value="openai-fast">GPT-4.1 Express</option>
+                </select>
+                <div id="videoModelDescription" class="text-xs text-gray-500 dark:text-gray-400 mt-1"></div>
+            </div>
+            
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Subjek Utama:</label>
+                <input type="text" id="videoSubject" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Contoh: Astronot, Kota futuristik...">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4">
+    <div class="form-group">
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Karakter 1:</label>
+        <input type="text" id="videoCharacter1" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Contoh: Astronot, Pahlawan...">
+    </div>
+    <div class="form-group">
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Karakter 2:</label>
+        <input type="text" id="videoCharacter2" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Contoh: Alien, Penjahat...">
+    </div>
+</div>
+
+<div class="form-group mb-4">
+    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Interaksi Karakter:</label>
+    <input type="text" id="videoCharacterInteraction" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Contoh: Bertarung, Berdansa, Berbicara...">
+</div>
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Aksi/Gerakan:</label>
+                <input type="text" id="videoAction" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Contoh: Berjalan pelan, Terbang melingkar...">
+            </div>
+            
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Gaya Visual:</label>
+                <select id="videoStyleSelect" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+                <div id="styleDescription" class="text-xs text-gray-500 dark:text-gray-400 mt-1"></div>
+            </div>
+            
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Latar Belakang:</label>
+                <input type="text" id="videoBackground" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Contoh: Hutan hujan, Ruang kontrol...">
+            </div>
+            
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Atmosfer/Suasana:</label>
+                <input type="text" id="videoAtmosphere" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Contoh: Misterius, Epik, Nostalgia...">
+            </div>
+            
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Teknik Kamera:</label>
+                <div class="techniques-grid grid grid-cols-2 gap-2">
+                    <label class="flex items-center"><input type="checkbox" name="cameraTechnique" value="dolly" class="camera-technique mr-2"> Dolly</label>
+                    <label class="flex items-center"><input type="checkbox" name="cameraTechnique" value="pan" class="camera-technique mr-2"> Pan</label>
+                    <label class="flex items-center"><input type="checkbox" name="cameraTechnique" value="tilt" class="camera-technique mr-2"> Tilt</label>
+                    <label class="flex items-center"><input type="checkbox" name="cameraTechnique" value="steadycam" class="camera-technique mr-2"> Steadycam</label>
+                    <label class="flex items-center"><input type="checkbox" name="cameraTechnique" value="handheld" class="camera-technique mr-2"> Handheld</label>
+                    <label class="flex items-center"><input type="checkbox" name="cameraTechnique" value="drone" class="camera-technique mr-2"> Drone</label>
+                </div>
+                <div id="cameraTip" class="text-xs text-gray-500 dark:text-gray-400 mt-1"></div>
+            </div>
+            
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Durasi (detik):</label>
+                <input type="range" id="videoDuration" min="2" max="60" value="10" class="w-full">
+                <span id="durationValue" class="text-xs text-gray-500 dark:text-gray-400">10</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Voice:</label>
+        <select id="videoVoiceSelect" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Dialogue Type:</label>
+        <select id="videoDialogueType" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+</div>
+
+<div class="form-group mb-4">
+    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Dialogue Text:</label>
+    <textarea id="videoDialogueText" rows="2" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Enter dialogue content..."></textarea>
+</div>
+            
+            <div class="form-group mb-4">
+                <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Detail Tambahan:</label>
+                <textarea id="videoDetails" rows="3" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext" placeholder="Contoh: Slow motion, efek partikel, 4K resolution..."></textarea>
+            </div>
+            
+<div class="grid grid-cols-2 gap-4 mb-4">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Jenis Shot:</label>
+        <select id="videoShotType" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Jenis Subjek:</label>
+        <select id="videoSubjectType" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 gap-4 mb-4">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Intensitas Aksi:</label>
+        <select id="videoActionIntensity" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Pencahayaan:</label>
+        <select id="videoLighting" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 gap-4 mb-4">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Mood:</label>
+        <select id="videoMood" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Palet Warna:</label>
+        <select id="videoColorPalette" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 gap-4 mb-4">
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Efek Khusus:</label>
+        <select id="videoSpecialEffects" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Transisi:</label>
+        <select id="videoTransitions" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Desain Suara:</label>
+    <select id="videoSoundDesign" class="neuromorphic-input w-full px-4 py-2 text-gray-800 dark:text-darktext"></select>
+        </div>
+            <button id="generateVideoPromptBtn" class="neuromorphic-btn w-full py-3 px-6 bg-gradient-to-r from-primary to-secondary text-white font-bold rounded-lg hover:opacity-90 transition flex items-center justify-center mb-4">
+                <i class="fas fa-magic mr-2"></i>Generate Video Prompt
+            </button>
+            
+            <div id="videoPromptLoading" class="text-center text-primary dark:text-primary-light mb-4" style="display: none;">
+                <i class="fas fa-spinner fa-spin mr-2"></i>Membuat prompt...
+            </div>
+            
+                       
+        <div class="form-group">
+            <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Prompt Video:</label>
+            <div id="videoPromptOutputContainer" class="mt-4"></div>
+        </div>
+        <!-- In the videoContent section, replace the videoPromptOutputContainer with this: -->
+<div class="form-group">
+    <label class="block text-sm font-medium text-gray-700 dark:text-darktext mb-2">Prompt Video:</label>
+    <div class="flex gap-2 mb-2">
+        <button id="copyVideoPromptBtn" class="neuromorphic-btn py-2 px-4 bg-primary/10 text-primary dark:text-primary-light font-medium rounded-lg hover:bg-primary/20 transition flex items-center justify-center">
+            <i class="fas fa-copy mr-2"></i>Copy
+        </button>
+        <button id="regenerateVideoPromptBtn" class="neuromorphic-btn py-2 px-4 bg-primary/10 text-primary dark:text-primary-light font-medium rounded-lg hover:bg-primary/20 transition flex items-center justify-center">
+            <i class="fas fa-sync-alt mr-2"></i>Regenerate
+        </button>
+    </div>
+        
+    <div class="mt-4">
+        <h4 class="text-sm font-medium text-gray-700 dark:text-darktext mb-2 flex items-center">
+            <i class="fas fa-history mr-2"></i>Prompt History
+        </h4>
+        <div id="videoPromptHistory" class="space-y-2 max-h-40 overflow-y-auto"></div>
+    </div>
+</div>
+        
+        <!-- Tambahkan history container ini -->
+        <div class="mt-6">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-darktext flex items-center">
+                    <i class="fas fa-history mr-2 text-primary"></i>Generation History
+                </h3>
+                <button id="clearVideoHistoryBtn" class="text-xs text-red-500 hover:text-red-700 dark:hover:text-red-400 flex items-center">
+                    <i class="fas fa-trash-alt mr-1"></i>Clear All
+                </button>
+            </div>
+            <div id="videoHistoryContainer" class="space-y-3 max-h-64 overflow-y-auto">
+                <!-- History items will be added here -->
+            </div>
+        </div>
+    </div>
+            </main>
+        </div>
+    </div>
+    </main>
+        
+        <!-- Footer -->
+        <footer class="neuromorphic mx-4 mb-4 py-4">
+            <div class="container mx-auto px-4 text-center text-gray-600 dark:text-gray-300">
+                <p class="flex items-center justify-center">
+                    <i class="fas fa-bolt text-primary mr-2"></i>Powered by Pollinations | KenthirAi ©2025
+                </p>
+            </div>
+        </footer>
+    </div>    
+
+    <script src="./js/app.js"></script>
+    <script src="./js/chat.js"></script>
+    <script src="./js/analysis.js"></script>
+    <script src="./js/enhance.js"></script>
+    <script src="./js/filter.js"></script>
+    <script src="./js/video.js"></script>
+    
+    <script>
+    // Tab switching functionality - tetap pertahankan event listeners yang ada
+document.getElementById('imageTab').addEventListener('click', () => {
+    switchTab('imageGeneratorContent', 'imageTab');
+});
+
+document.getElementById('chatTab').addEventListener('click', () => {
+    switchTab('chatContent', 'chatTab');
+});
+
+document.getElementById('analysisTab').addEventListener('click', () => {
+    switchTab('analysisContent', 'analysisTab');
+});
+
+document.getElementById('videoTab').addEventListener('click', () => {
+    switchTab('videoContent', 'videoTab');
+});
+
+// Versi lebih sederhana dari fungsi switchTab
+function switchTab(contentId, tabId) {
+    // Hide all contents
+    document.querySelectorAll('main[id$="Content"]').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tabs
+    document.querySelectorAll('.tab-btn').forEach(tab => {
+        tab.classList.remove('active', 'text-primary', 'border-primary');
+        tab.classList.add('text-gray-500', 'dark:text-gray-400');
+    });
+    
+    // Show selected content and activate tab
+    document.getElementById(contentId).classList.remove('hidden');
+    const activeTab = document.getElementById(tabId);
+    activeTab.classList.add('active', 'text-primary', 'border-primary');
+    activeTab.classList.remove('text-gray-500', 'dark:text-gray-400');
+        } 
+    </script>
+<script>
+// Update the switchTab function to include the video tab
+function switchTab(contentId, tabId) {
+    // Hide all contents
+    document.getElementById('imageGeneratorContent').classList.add('hidden');
+    document.getElementById('chatContent').classList.add('hidden');
+    document.getElementById('analysisContent').classList.add('hidden');
+    document.getElementById('videoContent').classList.add('hidden');
+    
+    // Remove active class from all tabs
+    document.getElementById('imageTab').classList.remove('active', 'text-primary', 'border-primary');
+    document.getElementById('imageTab').classList.add('text-gray-500', 'dark:text-gray-400');
+    document.getElementById('chatTab').classList.remove('active', 'text-primary', 'border-primary');
+    document.getElementById('chatTab').classList.add('text-gray-500', 'dark:text-gray-400');
+    document.getElementById('analysisTab').classList.remove('active', 'text-primary', 'border-primary');
+    document.getElementById('analysisTab').classList.add('text-gray-500', 'dark:text-gray-400');
+    document.getElementById('videoTab').classList.remove('active', 'text-primary', 'border-primary');
+    document.getElementById('videoTab').classList.add('text-gray-500', 'dark:text-gray-400');
+    
+    // Show selected content and activate tab
+    document.getElementById(contentId).classList.remove('hidden');
+    document.getElementById(tabId).classList.add('active', 'text-primary', 'border-primary');
+    document.getElementById(tabId).classList.remove('text-gray-500', 'dark:text-gray-400');
+        }
+    <!-- Di bagian bawah file HTML, sebelum penutup </body> -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inisialisasi tab
+        document.getElementById('videoTab').addEventListener('click', () => {
+            switchTab('videoContent', 'videoTab');
+        });
+        
+        // Load video.js setelah DOM siap
+        const videoScript = document.createElement('script');
+        videoScript.src = './js/video.js';
+        document.body.appendChild(videoScript);
+    });
+</script>
+
+            </script> 
+</body>
+</html>
